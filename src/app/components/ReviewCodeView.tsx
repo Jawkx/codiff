@@ -631,7 +631,6 @@ export function ReviewCodeView({
         itemMetrics:
           walkthroughNotes.size > 0 ? codeViewItemMetricsWithWalkthrough : codeViewItemMetrics,
         layout: codeViewLayout,
-        lineDiffType: 'char',
         lineHoverHighlight: 'both',
         onGutterUtilityClick: (range, context) => {
           if (context.item.type !== 'diff') {

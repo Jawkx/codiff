@@ -43,7 +43,6 @@ export const diffContextExpansionLineCount = 100;
 export const diffCollapsedContextThreshold = 12;
 
 export const workerHighlighterOptions = {
-  lineDiffType: 'char' as const,
   maxLineDiffLength: 2000,
   theme: {
     dark: 'Dunkel',
