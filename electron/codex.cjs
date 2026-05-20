@@ -9,6 +9,8 @@ const CODEX_TIMEOUT_MS = 45_000;
 const DEFAULT_OPENAI_MODEL = 'gpt-5.3-codex-spark';
 const FALLBACK_OPENAI_MODEL = 'gpt-5.3-codex';
 const CODEX_REASONING_EFFORT = 'high';
+const CODEX_MACOS_BLOCKED_MESSAGE =
+  'macOS blocked the local Codex CLI. Update Codex CLI from the official OpenAI release, then run `codex --version` and try again.';
 /**
  * @typedef {{
  *   fallbackModel?: string;
@@ -51,6 +53,58 @@ const getCodexCommand = () => {
   }
 
   return 'codex';
+};
+
+/**
+ * @param {unknown} error
+ * @param {NodeJS.Platform} [platform]
+ */
+const getCodexLaunchErrorMessage = (error, platform = process.platform) => {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'string'
+        ? error
+        : error &&
+            typeof error === 'object' &&
+            'message' in error &&
+            typeof error.message === 'string'
+          ? error.message
+          : String(error ?? '');
+  const code =
+    error && typeof error === 'object' && 'code' in error && typeof error.code === 'string'
+      ? error.code
+      : '';
+  const signal =
+    error && typeof error === 'object' && 'signal' in error && typeof error.signal === 'string'
+      ? error.signal
+      : '';
+
+  if (
+    platform === 'darwin' &&
+    (code === 'EACCES' ||
+      code === 'EPERM' ||
+      signal === 'SIGKILL' ||
+      /\b(?:contains malware|malware blocked|not opened|will damage your computer|moved to (?:the )?bin|permission denied|operation not permitted)\b/i.test(
+        message,
+      ))
+  ) {
+    return message.trim()
+      ? `${CODEX_MACOS_BLOCKED_MESSAGE} (${message})`
+      : CODEX_MACOS_BLOCKED_MESSAGE;
+  }
+
+  return message;
+};
+
+/** @param {unknown} error */
+const getCodexLaunchError = (error) => {
+  const message = getCodexLaunchErrorMessage(error);
+  if (error instanceof Error && message === error.message) {
+    return error;
+  }
+
+  return new Error(message);
 };
 
 /** @param {unknown} value @param {string} [fallback] */
@@ -132,8 +186,9 @@ const runCodex = async (
         let stdout = '';
         let finished = false;
 
+        const codexCommand = getCodexCommand();
         const child = spawn(
-          getCodexCommand(),
+          codexCommand,
           [
             'exec',
             '-m',
@@ -180,9 +235,9 @@ const runCodex = async (
         child.on('error', (error) => {
           finished = true;
           clearTimeout(timer);
-          reject(error);
+          reject(getCodexLaunchError(error));
         });
-        child.on('close', async (code) => {
+        child.on('close', async (code, signal) => {
           if (finished) {
             return;
           }
@@ -191,9 +246,16 @@ const runCodex = async (
           clearTimeout(timer);
 
           if (code !== 0) {
+            const message = oneLine(
+              stderr || stdout || stdinError?.message,
+              signal ? `Codex was terminated by ${signal}.` : `Codex exited with code ${code}.`,
+            );
             reject(
               new Error(
-                oneLine(stderr || stdout || stdinError?.message, `Codex exited with code ${code}.`),
+                getCodexLaunchErrorMessage({
+                  message,
+                  signal: signal ?? '',
+                }),
               ),
             );
             return;
@@ -230,6 +292,7 @@ module.exports = {
   cleanText,
   DEFAULT_OPENAI_MODEL,
   FALLBACK_OPENAI_MODEL,
+  getCodexLaunchErrorMessage,
   isOpenAIModelAvailabilityError,
   normalizeOpenAIModel,
   normalizeEnum,
