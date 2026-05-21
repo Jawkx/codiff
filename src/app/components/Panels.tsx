@@ -1,3 +1,8 @@
+import { CaretDownIcon as CaretDown } from '@phosphor-icons/react/CaretDown';
+import { CaretUpIcon as CaretUp } from '@phosphor-icons/react/CaretUp';
+import { CheckIcon as Check } from '@phosphor-icons/react/Check';
+import { XIcon as X } from '@phosphor-icons/react/X';
+import { Copy as LucideCopy } from 'lucide-react';
 import {
   useCallback,
   useEffect,
@@ -50,7 +55,7 @@ export function RepositoryChangeBanner({ visible }: { visible: boolean }) {
         title="Dismiss"
         type="button"
       >
-        <span aria-hidden className="diff-search-close-icon" />
+        <X aria-hidden className="diff-search-icon" size={15} weight="bold" />
       </button>
     </div>
   );
@@ -216,7 +221,7 @@ export function DiffSearchPanel({
         title="Previous match"
         type="button"
       >
-        <span aria-hidden className="diff-search-chevron up" />
+        <CaretUp aria-hidden className="diff-search-icon" size={15} weight="bold" />
       </button>
       <button
         aria-label="Next match"
@@ -225,10 +230,10 @@ export function DiffSearchPanel({
         title="Next match"
         type="button"
       >
-        <span aria-hidden className="diff-search-chevron down" />
+        <CaretDown aria-hidden className="diff-search-icon" size={15} weight="bold" />
       </button>
       <button aria-label="Close search" onClick={onClose} title="Close" type="button">
-        <span aria-hidden className="diff-search-close-icon" />
+        <X aria-hidden className="diff-search-icon" size={15} weight="bold" />
       </button>
     </div>
   );
@@ -289,7 +294,11 @@ export function CopyCommentsButton({
       title="Copy review comments"
       type="button"
     >
-      <span aria-hidden className={copied ? 'copy-comments-icon check' : 'copy-comments-icon'} />
+      {copied ? (
+        <Check aria-hidden className="copy-comments-icon check" size={22} weight="bold" />
+      ) : (
+        <LucideCopy aria-hidden className="copy-comments-icon" size={21} strokeWidth={2.25} />
+      )}
     </button>
   );
 }
@@ -313,7 +322,7 @@ export function PullRequestReviewButtons({
         title="Approve pull request"
         type="button"
       >
-        <span aria-hidden className="review-submit-icon approve" />
+        <Check aria-hidden className="review-submit-icon approve" size={22} weight="bold" />
       </button>
       <button
         aria-label="Request changes"
@@ -323,11 +332,13 @@ export function PullRequestReviewButtons({
         title="Request changes"
         type="button"
       >
-        <span
+        <X
           aria-hidden
           className={`review-submit-icon request-changes${
             submittingEvent === 'REQUEST_CHANGES' ? ' submitting' : ''
           }`}
+          size={22}
+          weight="bold"
         />
       </button>
     </>

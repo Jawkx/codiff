@@ -1323,7 +1323,8 @@ export default function App() {
       (candidate) => !candidate.isReadOnly && candidate.body.length === 0,
     );
     if (emptyDraft) {
-      setFocusCommentId(emptyDraft.id);
+      const id = crypto.randomUUID();
+      setFocusCommentId(id);
       setFocusCommentRequest((current) => current + 1);
       setReviewComments((current) =>
         current.map((candidate) =>
@@ -1331,7 +1332,7 @@ export default function App() {
             ? {
                 ...comment,
                 body: '',
-                id: emptyDraft.id,
+                id,
               }
             : candidate,
         ),

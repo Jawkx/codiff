@@ -1,3 +1,6 @@
+import { CaretDownIcon as CaretDown } from '@phosphor-icons/react/CaretDown';
+import { CheckIcon as Check } from '@phosphor-icons/react/Check';
+import { XIcon as X } from '@phosphor-icons/react/X';
 import {
   type CodeViewLineSelection,
   type CodeViewItem,
@@ -6,6 +9,7 @@ import {
   type LineAnnotation,
 } from '@pierre/diffs';
 import { CodeView, type CodeViewHandle, WorkerPoolContextProvider } from '@pierre/diffs/react';
+import { Copy as LucideCopy } from 'lucide-react';
 import {
   Fragment,
   useCallback,
@@ -110,10 +114,11 @@ function CopyFilePathButton({ path }: { path: string }) {
       title={copied ? 'Path copied' : 'Copy file path'}
       type="button"
     >
-      <span
-        aria-hidden
-        className={copied ? 'codiff-copy-path-icon check' : 'codiff-copy-path-icon'}
-      />
+      {copied ? (
+        <Check aria-hidden className="codiff-copy-path-icon check" size={16} weight="bold" />
+      ) : (
+        <LucideCopy aria-hidden className="codiff-copy-path-icon" size={16} strokeWidth={2.25} />
+      )}
     </button>
   );
 }
@@ -167,7 +172,12 @@ function CodeViewHeader({
         title={isCollapsed ? 'Expand' : 'Collapse'}
       >
         <span className="codiff-chevron-box">
-          <span className={isCollapsed ? 'codiff-chevron collapsed' : 'codiff-chevron'} />
+          <CaretDown
+            aria-hidden
+            className={isCollapsed ? 'codiff-chevron collapsed' : 'codiff-chevron'}
+            size={16}
+            weight="bold"
+          />
         </span>
         <span className="codiff-file-heading">
           <span className="codiff-file-path-row">
@@ -213,7 +223,9 @@ function CodeViewHeader({
         onClick={() => onToggleViewed(file, isViewed)}
         type="button"
       >
-        <span aria-hidden className="codiff-viewed-checkbox" />
+        <span aria-hidden className="codiff-viewed-checkbox">
+          {isViewed ? <Check className="codiff-viewed-check" size={10} weight="bold" /> : null}
+        </span>
         Viewed
       </button>
     </div>
@@ -410,7 +422,12 @@ function ReviewAnnotation({
                       title="Delete comment"
                       type="button"
                     >
-                      <span aria-hidden className="review-comment-delete-icon" />
+                      <X
+                        aria-hidden
+                        className="review-comment-delete-icon"
+                        size={14}
+                        weight="bold"
+                      />
                     </button>
                   ) : null}
                 </div>
